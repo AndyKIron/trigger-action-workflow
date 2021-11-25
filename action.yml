@@ -35,4 +35,5 @@ outputs:
   workflow_url:
     description: The URL of the workflow that was triggered by this action
 runs:
-  using: 'ubuntu-latest'
+  using: 'docker'
+  image: 'Dockerfile'
