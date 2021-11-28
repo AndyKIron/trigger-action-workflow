@@ -77,9 +77,10 @@ trigger_workflow() {
     -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
     --data "{\"ref\":\"${ref}\",\"inputs\":${inputs}}")
 
-  echo "Trigger response ${trigger_workflow}"
+  echo "Trigger response >>${trigger_workflow}<<"
   echo "Sleeping for ${wait_interval} seconds"
-  sleep $wait_interval
+#  sleep $wait_interval
+  sleep 5
 }
 
 wait_for_workflow_to_finish() {
