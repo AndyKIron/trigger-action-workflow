@@ -41,12 +41,6 @@ validate_args() {
     exit 1
   fi
 
-  if [ -z "${$INPUT_REF}" ]
-  then
-    echo "Error: Ref (branch name) is a required argument."
-    exit 1
-  fi
-
   if [ -z "${INPUT_GITHUB_TOKEN}" ]
   then
     echo "Error: Github token is required. You can head over settings and"
@@ -65,6 +59,12 @@ validate_args() {
   if [ "${INPUT_INPUTS}" ]
   then
     inputs=$(echo "${INPUT_INPUTS}" | jq)
+  fi
+
+  ref="main"
+  if [ "$INPUT_REF" ]
+  then
+    ref="${INPUT_REF}"
   fi
 }
 
@@ -94,13 +94,11 @@ wait_for_workflow_to_finish() {
   do
     echo "Using the following params to filter the workflow runs to get the triggered run id -"
     echo "Query params: ${query}"
-    echo ""
-    echo "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs?${query}"
-    echo ""
     last_workflow=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs?${query}" \
       -H 'Accept: application/vnd.github.antiope-preview+json' \
       -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq '[.workflow_runs[]] | first')
   done
+
   last_workflow_id=$(echo "${last_workflow}" | jq '.id')
   last_workflow_url="${GITHUB_SERVER_URL}/${INPUT_OWNER}/${INPUT_REPO}/actions/runs/${last_workflow_id}"
   echo "The workflow id is [${last_workflow_id}]."
