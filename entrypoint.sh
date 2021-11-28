@@ -84,7 +84,7 @@ trigger_workflow() {
 wait_for_workflow_to_finish() {
   # Find the id of the last run using filters to identify the workflow triggered by this action
   echo "Getting the ID of the workflow..."
-  query="event=workflow_dispatch&status=queued"
+  query="event=workflow_dispatch&status=in_progress"
   if [ "$INPUT_GITHUB_USER" ]
   then
     query="${query}&actor=${INPUT_GITHUB_USER}"
