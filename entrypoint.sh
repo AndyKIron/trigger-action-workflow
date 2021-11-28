@@ -41,6 +41,12 @@ validate_args() {
     exit 1
   fi
 
+  if [ -z "${$INPUT_REF}" ]
+  then
+    echo "Error: Ref (branch name) is a required argument."
+    exit 1
+  fi
+
   if [ -z "${INPUT_GITHUB_TOKEN}" ]
   then
     echo "Error: Github token is required. You can head over settings and"
@@ -59,12 +65,6 @@ validate_args() {
   if [ "${INPUT_INPUTS}" ]
   then
     inputs=$(echo "${INPUT_INPUTS}" | jq)
-  fi
-
-  ref="main"
-  if [ "$INPUT_REF" ]
-  then
-    ref="${INPUT_REF}"
   fi
 }
 
