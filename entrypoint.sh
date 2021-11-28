@@ -91,11 +91,11 @@ wait_for_workflow_to_finish() {
   while [[ "$last_workflow" == "null" ]]
   do
     # -------------------------------------------------------------------------
-    status = "queued"
+    status="queued"
     if [ try_count -ge try_max ]
     then
       # if was try limit, do check with status - in_progress
-      status = "in_progress"
+      status="in_progress"
     fi
     query="event=workflow_dispatch&status=${status}"
     let "try_count++"
