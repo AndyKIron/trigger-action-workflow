@@ -84,14 +84,27 @@ trigger_workflow() {
 wait_for_workflow_to_finish() {
   # Find the id of the last run using filters to identify the workflow triggered by this action
   echo "Getting the ID of the workflow..."
-  query="event=workflow_dispatch&status=queued"
-  if [ "$INPUT_GITHUB_USER" ]
-  then
-    query="${query}&actor=${INPUT_GITHUB_USER}"
-  fi
+  # first try get workflow ryn in with status - queued
+  try_count=0
+  try_max=10
   last_workflow="null"
   while [[ "$last_workflow" == "null" ]]
   do
+    # -------------------------------------------------------------------------
+    status = "queued"
+    if [ try_count -ge try_max ]
+    then
+      # if was try limit, do check with status - in_progress
+      status = "in_progress"
+    fi
+    query="event=workflow_dispatch&status=${status}"
+    let "try_count++"
+    # -------------------------------------------------------------------------
+    if [ "$INPUT_GITHUB_USER" ]
+    then
+      query="${query}&actor=${INPUT_GITHUB_USER}"
+    fi
+    # -------------------------------------------------------------------------
     echo "Using the following params to filter the workflow runs to get the triggered run id -"
     echo "Query params: ${query}"
 
