@@ -84,16 +84,19 @@ trigger_workflow() {
 wait_for_workflow_to_finish() {
   # Find the id of the last run using filters to identify the workflow triggered by this action
   echo "Getting the ID of the workflow..."
-  query="event=workflow_dispatch&status=queued"
+  query="event=workflow_dispatch&status=in_progress"
+#  query="event=workflow_dispatch&status=queued"
   if [ "$INPUT_GITHUB_USER" ]
   then
     query="${query}&actor=${INPUT_GITHUB_USER}"
   fi
   last_workflow="null"
+  iteration_cnt=0
   while [[ "$last_workflow" == "null" ]]
   do
     echo "Using the following params to filter the workflow runs to get the triggered run id -"
     echo "Query params: ${query}"
+    echo "Iteration: ${iteration_cnt}"
 
     last_workflow=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs?${query}" \
       -H 'Accept: application/vnd.github.antiope-preview+json' \
