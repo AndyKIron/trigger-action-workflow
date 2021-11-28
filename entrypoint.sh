@@ -1,10 +1,6 @@
 #!/bin/sh
 set -e
 
-usage_docs() {
-  echo ""
-  echo "You can use this Github Action with:"
-}
 GITHUB_API_URL="${API_URL:-https://api.github.com}"
 GITHUB_SERVER_URL="${SERVER_URL:-https://github.com}"
 
@@ -36,14 +32,12 @@ validate_args() {
   if [ -z "${INPUT_OWNER}" ]
   then
     echo "Error: Owner is a required argument."
-    usage_docs
     exit 1
   fi
 
   if [ -z "${INPUT_REPO}" ]
   then
     echo "Error: Repo is a required argument."
-    usage_docs
     exit 1
   fi
 
@@ -52,14 +46,12 @@ validate_args() {
     echo "Error: Github token is required. You can head over settings and"
     echo "under developer, you can create a personal access tokens. The"
     echo "token requires repo access."
-    usage_docs
     exit 1
   fi
 
   if [ -z "${INPUT_WORKFLOW_FILE_NAME}" ]
   then
     echo "Error: Workflow File Name is required"
-    usage_docs
     exit 1
   fi
 
