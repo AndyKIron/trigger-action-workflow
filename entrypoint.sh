@@ -94,7 +94,7 @@ wait_for_workflow_to_finish() {
     # -------------------------------------------------------------------------
     echo ">>> $try_count"
     status="queued"
-    if (( try_count >= try_max ))
+    if (( $try_count >= $try_max ))
     then
       # if was try limit, do check with status - in_progress
       status="in_progress"
