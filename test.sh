@@ -1,14 +1,14 @@
   i=0
   try_count=0
-  try_max=10
+  try_max=3
 
-  while [  $i -le 15 ]
+  while [  $i -le 5 ]
   do
     echo Number: $i
     let "i++"
 
     status="queued"
-    if [[ try_count -ge try_max ]]
+    if [[ "$try_count" -ge "$try_max" ]]
     then
       # if was try limit, do check with status - in_progress
       status="in_progress"
