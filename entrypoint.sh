@@ -92,7 +92,7 @@ wait_for_workflow_to_finish() {
   while [[ "$last_workflow" == "null" ]]
   do
     # -------------------------------------------------------------------------
-    echo ">>> $try_count"
+    echo ">>> $try_count : $try_max"
     status="queued"
     if (( $try_count >= $try_max ))
     then
