@@ -125,6 +125,8 @@ wait_for_workflow_to_finish() {
     echo "Checking status [${status}]"
   done
 
+  echo ">>>>>>${workflow}"
+
   if [[ "${conclusion}" == "\"success\"" && "${status}" == "\"completed\"" ]]
   then
     echo "Yes, success"
