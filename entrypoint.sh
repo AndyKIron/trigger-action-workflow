@@ -3,6 +3,7 @@ set -e
 
 GITHUB_API_URL="${API_URL:-https://api.github.com}"
 GITHUB_SERVER_URL="${SERVER_URL:-https://github.com}"
+WAIT_AFTER_TRIGGER=2
 
 validate_args() {
   wait_interval=10 # Waits for 10 seconds
@@ -78,8 +79,8 @@ trigger_workflow() {
     --data "{\"ref\":\"${ref}\",\"inputs\":${inputs}}")
 
   echo "Trigger response >>${trigger_workflow}<<"
-  echo "Sleeping for ${wait_interval} seconds"
-  sleep $wait_interval
+  echo "Sleeping for ${WAIT_AFTER_TRIGGER} seconds"
+  sleep $WAIT_AFTER_TRIGGER
 }
 
 wait_for_workflow_to_finish() {
@@ -107,8 +108,8 @@ wait_for_workflow_to_finish() {
     fi
     # -------------------------------------------------------------------------
     echo "Using the following params to filter the workflow runs to get the triggered run id -"
-    echo "Query params: ${query}"
-    sleep 1
+    echo "Try: ${try_count} Query params: ${query}"
+
     last_workflow=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs?${query}" \
       -H 'Accept: application/vnd.github.antiope-preview+json' \
       -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq '[.workflow_runs[]] | first')
