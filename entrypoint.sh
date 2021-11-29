@@ -88,14 +88,14 @@ wait_for_workflow_to_finish() {
   echo "Getting the ID of the workflow..."
   # first try get workflow ryn in with status - queued
   try_count=0
-  try_max=10
+  try_max=3
   last_workflow="null"
   while [[ "$last_workflow" == "null" ]]
   do
     # -------------------------------------------------------------------------
     echo ">>> $try_count : $try_max"
     status="queued"
-    if  [[ "$try_count" -ge "$try_max" ]]
+    if  [[ "$try_count" >= "$try_max" ]]
     then
       # if was try limit, do check with status - in_progress
       status="in_progress"
