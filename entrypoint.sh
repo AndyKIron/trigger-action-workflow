@@ -71,14 +71,14 @@ validate_args() {
 trigger_workflow() {
   echo "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/dispatches"
 
-#  trigger_workflow=$(curl --fail -X POST "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/dispatches" \
-#    -H "Accept: application/vnd.github.v3+json" \
-#    -H "Content-Type: application/json" \
-#    -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
-#    --data "{\"ref\":\"${ref}\",\"inputs\":${inputs}}")
-#
-#  echo "Trigger response >>${trigger_workflow}<<"
-#  echo "Sleeping for ${wait_interval} seconds"
+  trigger_workflow=$(curl --fail -X POST "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/dispatches" \
+    -H "Accept: application/vnd.github.v3+json" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
+    --data "{\"ref\":\"${ref}\",\"inputs\":${inputs}}")
+
+  echo "Trigger response >>${trigger_workflow}<<"
+  echo "Sleeping for ${wait_interval} seconds"
   sleep $wait_interval
 }
 
@@ -92,17 +92,14 @@ wait_for_workflow_to_finish() {
   while [[ "$last_workflow" == "null" ]]
   do
     # -------------------------------------------------------------------------
-    echo ">>> $try_count : $try_max"
     status="queued"
-
     if  [[ "$try_count" -ge "$try_max" ]]
     then
       # if was try limit, do check with status - in_progress
       status="in_progress"
     fi
-
     query="event=workflow_dispatch&status=${status}"
-    let "try_count++"
+    let "try_count=try_count+1"
     # -------------------------------------------------------------------------
     if [ "$INPUT_GITHUB_USER" ]
     then
@@ -112,9 +109,9 @@ wait_for_workflow_to_finish() {
     echo "Using the following params to filter the workflow runs to get the triggered run id -"
     echo "Query params: ${query}"
     sleep 1
-#    last_workflow=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs?${query}" \
-#      -H 'Accept: application/vnd.github.antiope-preview+json' \
-#      -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq '[.workflow_runs[]] | first')
+    last_workflow=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs?${query}" \
+      -H 'Accept: application/vnd.github.antiope-preview+json' \
+      -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq '[.workflow_runs[]] | first')
   done
   echo "Workflow found: ${last_workflow}"
 
