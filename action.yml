@@ -23,6 +23,8 @@ inputs:
   workflow_file_name:
     description: "The reference point. For example, you could use main.yml."
     required: true
+  job_name_substring:
+    required: true
   inputs:
     description: 'Inputs to pass to the workflow, must be a JSON string'
     required: false
