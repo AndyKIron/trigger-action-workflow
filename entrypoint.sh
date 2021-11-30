@@ -114,7 +114,7 @@ wait_for_workflow_to_finish() {
 
     job_id=$(curl -X GET "https://api.github.com/repos/ironsource-mobile/fusion-actions/actions/runs/$wf_id/jobs" \
       -H 'Accept: application/vnd.github.antiope-preview+json' \
-      -H "Authorization: Bearer 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" | jq ".jobs[] | select(.name | test(\"${INPUT_JOB_NAME_SUBSTRING}\")) | .id")
+      -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq ".jobs[] | select(.name | test(\"${INPUT_JOB_NAME_SUBSTRING}\")) | .id")
 
     echo "== $job_id"
 
