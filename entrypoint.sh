@@ -94,7 +94,13 @@ wait_for_workflow_to_finish() {
   # get needed workflow id
   workflow_id="null"
   # get list of workflows
-  list_workflows_ids=$(curl -X GET "https://api.github.com/repos/ironsource-mobile/fusion-actions/actions/workflows/code-validate.yml/runs?event=workflow_dispatch" \
+  query="event=workflow_dispatch"
+  if [ "$INPUT_GITHUB_USER" ]
+  then
+    query="${query}&actor=${INPUT_GITHUB_USER}"
+  fi
+
+  list_workflows_ids=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs?${query}" \
     -H 'Accept: application/vnd.github.antiope-preview+json' \
     -H "Authorization: Bearer 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" | jq '.workflow_runs[] | select(.conclusion=="failure" or .conclusion=="cancelled") | .id')
 
