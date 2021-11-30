@@ -125,9 +125,10 @@ wait_for_workflow_to_finish() {
   echo "::set-output name=workflow_id::${triggered_workflow_id}"
   echo "::set-output name=workflow_url::${last_workflow_url}"
   echo ""
+
+  # start checking triggered workflow status till completed --------
   conclusion="null"
   status="null"
-  # start checking triggered workflow status till completed --------
   while [[ "${conclusion}" == "null" && "${status}" != "\"completed\"" ]]
   do
     echo "Sleeping for \"${wait_interval}\" seconds"
