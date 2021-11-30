@@ -190,8 +190,6 @@ wait_for_workflow_to_finish() {
 main() {
   validate_args
 
-  echo ">>>> ${INPUT_JOB_NAME_SUBSTRING} :: ${INPUT_OWNER}"
-
   if [ "${trigger_workflow}" = true ]
   then
     trigger_workflow
