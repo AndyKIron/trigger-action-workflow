@@ -92,11 +92,35 @@ trigger_workflow() {
 wait_for_workflow_to_finish() {
   # Find the id of the last run using filters to identify the workflow triggered by this action
   echo "Getting the ID of the workflow..."
+  # get needed workflow id
+  workflow_id="null"
+  # get list of workflows
+  list_workflows_ids=$(curl -X GET "https://api.github.com/repos/ironsource-mobile/fusion-actions/actions/workflows/code-validate.yml/runs?event=workflow_dispatch" \
+    -H 'Accept: application/vnd.github.antiope-preview+json' \
+    -H "Authorization: Bearer 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" | jq '.workflow_runs[] | select(.conclusion=="failure" or .conclusion=="cancelled") | .id')
+
+  echo ">> $list_workflows_ids"
+  # check each for needed job name
+  for wf_id in $list_workflows_ids
+  do
+    echo  "::: $wf_id :: $TEST_STRING"
+
+    job_id=$(curl -X GET "https://api.github.com/repos/ironsource-mobile/fusion-actions/actions/runs/$wf_id/jobs" \
+      -H 'Accept: application/vnd.github.antiope-preview+json' \
+      -H "Authorization: Bearer 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" | jq ".jobs[] | select(.name | test(\"${INPUT_JOB_NAME_SUBSTRING}\")) | .id")
+
+    echo "== $job_id"
+
+    if  [[ ! -z "$job_id" ]]
+    then
+      workflow_id=$wf_id
+      break
+    fi
+  done
+  echo ">> $workflow_id"
 
   # first try get workflow ryn in with status - queued
   # get running workflows with statuses 'queued' and 'in_progress'
-
-
 #  try_count=0
 #  try_max=3
 #  last_workflow="null"
@@ -125,42 +149,42 @@ wait_for_workflow_to_finish() {
 #      -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq '[.workflow_runs[]] | first')
 #  done
 
-  last_workflow_id=$(echo "${last_workflow}" | jq '.id')
-  last_workflow_url="${GITHUB_SERVER_URL}/${INPUT_OWNER}/${INPUT_REPO}/actions/runs/${last_workflow_id}"
-  echo "The workflow id is [${last_workflow_id}]."
-  echo "The workflow logs can be found at ${last_workflow_url}"
-  echo "::set-output name=workflow_id::${last_workflow_id}"
-  echo "::set-output name=workflow_url::${last_workflow_url}"
-  echo ""
-  conclusion=$(echo "${last_workflow}" | jq '.conclusion')
-  status=$(echo "${last_workflow}" | jq '.status')
-
-  while [[ "${conclusion}" == "null" && "${status}" != "\"completed\"" ]]
-  do
-    echo "Sleeping for \"${wait_interval}\" seconds"
-    sleep "${wait_interval}"
-    echo "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs"
-    workflow=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs" \
-      -H 'Accept: application/vnd.github.antiope-preview+json' \
-      -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq '.workflow_runs[] | select(.id == '${last_workflow_id}')')
-    conclusion=$(echo "${workflow}" | jq '.conclusion')
-    status=$(echo "${workflow}" | jq '.status')
-    echo "Checking conclusion [${conclusion}]"
-    echo "Checking status [${status}]"
-  done
-
-  if [[ "${conclusion}" == "\"success\"" && "${status}" == "\"completed\"" ]]
-  then
-    echo "Yes, success"
-  else
-    # Alternative "failure"
-    echo "Conclusion is not success, its [${conclusion}]."
-    if [ "${propagate_failure}" = true ]
-    then
-      echo "Propagating failure to upstream job"
-      exit 1
-    fi
-  fi
+#  last_workflow_id=$(echo "${last_workflow}" | jq '.id')
+#  last_workflow_url="${GITHUB_SERVER_URL}/${INPUT_OWNER}/${INPUT_REPO}/actions/runs/${last_workflow_id}"
+#  echo "The workflow id is [${last_workflow_id}]."
+#  echo "The workflow logs can be found at ${last_workflow_url}"
+#  echo "::set-output name=workflow_id::${last_workflow_id}"
+#  echo "::set-output name=workflow_url::${last_workflow_url}"
+#  echo ""
+#  conclusion=$(echo "${last_workflow}" | jq '.conclusion')
+#  status=$(echo "${last_workflow}" | jq '.status')
+#
+#  while [[ "${conclusion}" == "null" && "${status}" != "\"completed\"" ]]
+#  do
+#    echo "Sleeping for \"${wait_interval}\" seconds"
+#    sleep "${wait_interval}"
+#    echo "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs"
+#    workflow=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs" \
+#      -H 'Accept: application/vnd.github.antiope-preview+json' \
+#      -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq '.workflow_runs[] | select(.id == '${last_workflow_id}')')
+#    conclusion=$(echo "${workflow}" | jq '.conclusion')
+#    status=$(echo "${workflow}" | jq '.status')
+#    echo "Checking conclusion [${conclusion}]"
+#    echo "Checking status [${status}]"
+#  done
+#
+#  if [[ "${conclusion}" == "\"success\"" && "${status}" == "\"completed\"" ]]
+#  then
+#    echo "Yes, success"
+#  else
+#    # Alternative "failure"
+#    echo "Conclusion is not success, its [${conclusion}]."
+#    if [ "${propagate_failure}" = true ]
+#    then
+#      echo "Propagating failure to upstream job"
+#      exit 1
+#    fi
+#  fi
 }
 
 main() {
@@ -168,19 +192,19 @@ main() {
 
   echo ">>>> ${INPUT_JOB_NAME_SUBSTRING} :: ${INPUT_OWNER}"
 
-#  if [ "${trigger_workflow}" = true ]
-#  then
-#    trigger_workflow
-#  else
-#    echo "Skipping triggering the workflow."
-#  fi
-#
-#  if [ "${wait_workflow}" = true ]
-#  then
-#    wait_for_workflow_to_finish
-#  else
-#    echo "Skipping waiting for workflow."
-#  fi
+  if [ "${trigger_workflow}" = true ]
+  then
+    trigger_workflow
+  else
+    echo "Skipping triggering the workflow."
+  fi
+
+  if [ "${wait_workflow}" = true ]
+  then
+    wait_for_workflow_to_finish
+  else
+    echo "Skipping waiting for workflow."
+  fi
 }
 
 main
