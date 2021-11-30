@@ -92,7 +92,7 @@ wait_for_workflow_to_finish() {
   # Find the id of the last run using filters to identify the workflow triggered by this action
   echo "Getting the ID of the workflow..."
 
-  # get list of workflows
+  # get list of workflow ids --------------------------------------
   query="event=workflow_dispatch"
   if [ "$INPUT_GITHUB_USER" ]
   then
@@ -102,7 +102,8 @@ wait_for_workflow_to_finish() {
   list_workflows_ids=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs?${query}" \
     -H 'Accept: application/vnd.github.antiope-preview+json' \
     -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq '.workflow_runs[] | select(.status=="queued" or .status=="in_progress") | .id')
-
+  # ---------------------------------------------------------------
+  # get triggered workflow id by job name substring included branch name and short SHA of commit
   triggered_workflow_id="null"
   for wf_id in $list_workflows_ids
   do
@@ -111,10 +112,12 @@ wait_for_workflow_to_finish() {
       -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq ".jobs[] | select(.name | test(\"${INPUT_JOB_NAME_SUBSTRING}\")) | .id")
     if  [[ ! -z "$job_id" ]]
     then
+      # triggered workflow id found
       triggered_workflow_id=$wf_id
       break
     fi
   done
+  # ---------------------------------------------------------------
 
   last_workflow_url="${GITHUB_SERVER_URL}/${INPUT_OWNER}/${INPUT_REPO}/actions/runs/${triggered_workflow_id}"
   echo "The workflow id is [${triggered_workflow_id}]."
@@ -124,7 +127,7 @@ wait_for_workflow_to_finish() {
   echo ""
   conclusion=$(echo "${last_workflow}" | jq '.conclusion')
   status=$(echo "${last_workflow}" | jq '.status')
-
+  # start checking triggered workflow status till completed --------
   while [[ "${conclusion}" == "null" && "${status}" != "\"completed\"" ]]
   do
     echo "Sleeping for \"${wait_interval}\" seconds"
@@ -138,7 +141,8 @@ wait_for_workflow_to_finish() {
     echo "Checking conclusion [${conclusion}]"
     echo "Checking status [${status}]"
   done
-
+  # ---------------------------------------------------------------
+  # check target workflow conclusion
   if [[ "${conclusion}" == "\"success\"" && "${status}" == "\"completed\"" ]]
   then
     echo "Yes, success"
@@ -151,6 +155,7 @@ wait_for_workflow_to_finish() {
       exit 1
     fi
   fi
+  # ---------------------------------------------------------------
 }
 
 main() {
