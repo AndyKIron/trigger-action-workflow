@@ -1,8 +1,6 @@
 #!/bin/sh
 set -e
 
-echo $@
-
 GITHUB_API_URL="${API_URL:-https://api.github.com}"
 GITHUB_SERVER_URL="${SERVER_URL:-https://github.com}"
 
@@ -57,12 +55,11 @@ validate_args() {
     exit 1
   fi
 
-  if [ -z "${INPUT_JOB_NAME_SUBSRING}" ]
+  if [ -z "${INPUT_JOB_NAME_SUBSTRING}" ]
   then
     echo "Error: Job name substring is a required argument."
     exit 1
   fi
-
 
   inputs=$(echo '{}' | jq)
   if [ "${INPUT_INPUTS}" ]
