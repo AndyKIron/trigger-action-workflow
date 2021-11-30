@@ -104,7 +104,7 @@ wait_for_workflow_to_finish() {
 
   list_workflows_ids=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs?${query}" \
     -H 'Accept: application/vnd.github.antiope-preview+json' \
-    -H "Authorization: Bearer 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" | jq '.workflow_runs[] | select(.status=="queued" or .status=="in_progress") | .id')
+    -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq '.workflow_runs[] | select(.status=="queued" or .status=="in_progress") | .id')
 
   echo ">> $list_workflows_ids"
   # check each for needed job name
