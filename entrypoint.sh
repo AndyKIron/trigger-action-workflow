@@ -3,7 +3,6 @@ set -e
 
 GITHUB_API_URL="${API_URL:-https://api.github.com}"
 GITHUB_SERVER_URL="${SERVER_URL:-https://github.com}"
-WAIT_AFTER_TRIGGER=2
 
 validate_args() {
   wait_interval=10 # Waits for 10 seconds
@@ -55,6 +54,13 @@ validate_args() {
     echo "Error: Workflow File Name is required"
     exit 1
   fi
+
+    if [ -z "${INPUT_JOB_NAME_SUBSRING}" ]
+    then
+      echo "Error: Job name substring is a required argument."
+      exit 1
+    fi
+
 
   inputs=$(echo '{}' | jq)
   if [ "${INPUT_INPUTS}" ]
@@ -161,7 +167,7 @@ wait_for_workflow_to_finish() {
 main() {
   validate_args
 
-  echo: ">>>> $inputs"
+  echo: ">>>> $INPUT_JOB_NAME_SUBSRING"
 
 #  if [ "${trigger_workflow}" = true ]
 #  then
