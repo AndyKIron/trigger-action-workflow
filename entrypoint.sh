@@ -110,9 +110,9 @@ wait_for_workflow_to_finish() {
   # check each for needed job name
   for wf_id in $list_workflows_ids
   do
-    echo  "::: $wf_id :: $TEST_STRING"
+    echo  "::: $wf_id :: ${INPUT_JOB_NAME_SUBSTRING}"
 
-    job_id=$(curl -X GET "https://api.github.com/repos/ironsource-mobile/fusion-actions/actions/runs/$wf_id/jobs" \
+    job_id=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/runs/$wf_id/jobs" \
       -H 'Accept: application/vnd.github.antiope-preview+json' \
       -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq ".jobs[] | select(.name | test(\"${INPUT_JOB_NAME_SUBSTRING}\")) | .id")
 
