@@ -72,6 +72,7 @@ validate_args() {
 trigger_workflow() {
   echo "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/dispatches"
   echo "{\"ref\":\"${ref}\",\"inputs\":${inputs}}"
+
   trigger_workflow=$(curl --fail -X POST "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/dispatches" \
     -H "Accept: application/vnd.github.v3+json" \
     -H "Content-Type: application/json" \
@@ -86,34 +87,38 @@ trigger_workflow() {
 wait_for_workflow_to_finish() {
   # Find the id of the last run using filters to identify the workflow triggered by this action
   echo "Getting the ID of the workflow..."
-  # first try get workflow ryn in with status - queued
-  try_count=0
-  try_max=3
-  last_workflow="null"
-  while [[ "$last_workflow" == "null" ]]
-  do
-    # -------------------------------------------------------------------------
-    status="queued"
-    if  [[ "$try_count" -ge "$try_max" ]]
-    then
-      # if was try limit, do check with status - in_progress
-      status="in_progress"
-    fi
-    query="event=workflow_dispatch&status=${status}"
-    let "try_count=try_count+1"
-    # -------------------------------------------------------------------------
-    if [ "$INPUT_GITHUB_USER" ]
-    then
-      query="${query}&actor=${INPUT_GITHUB_USER}"
-    fi
-    # -------------------------------------------------------------------------
-    echo "Using the following params to filter the workflow runs to get the triggered run id -"
-    echo "Try: ${try_count} Query params: ${query}"
 
-    last_workflow=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs?${query}" \
-      -H 'Accept: application/vnd.github.antiope-preview+json' \
-      -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq '[.workflow_runs[]] | first')
-  done
+  # first try get workflow ryn in with status - queued
+  # get running workflows with statuses 'queued' and 'in_progress'
+
+
+#  try_count=0
+#  try_max=3
+#  last_workflow="null"
+#  while [[ "$last_workflow" == "null" ]]
+#  do
+#    # -------------------------------------------------------------------------
+#    status="queued"
+#    if  [[ "$try_count" -ge "$try_max" ]]
+#    then
+#      # if was try limit, do check with status - in_progress
+#      status="in_progress"
+#    fi
+#    query="event=workflow_dispatch&status=${status}"
+#    let "try_count=try_count+1"
+#    # -------------------------------------------------------------------------
+#    if [ "$INPUT_GITHUB_USER" ]
+#    then
+#      query="${query}&actor=${INPUT_GITHUB_USER}"
+#    fi
+#    # -------------------------------------------------------------------------
+#    echo "Using the following params to filter the workflow runs to get the triggered run id -"
+#    echo "Try: ${try_count} Query params: ${query}"
+#
+#    last_workflow=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs?${query}" \
+#      -H 'Accept: application/vnd.github.antiope-preview+json' \
+#      -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" | jq '[.workflow_runs[]] | first')
+#  done
 
   last_workflow_id=$(echo "${last_workflow}" | jq '.id')
   last_workflow_url="${GITHUB_SERVER_URL}/${INPUT_OWNER}/${INPUT_REPO}/actions/runs/${last_workflow_id}"
@@ -156,19 +161,21 @@ wait_for_workflow_to_finish() {
 main() {
   validate_args
 
-  if [ "${trigger_workflow}" = true ]
-  then
-    trigger_workflow
-  else
-    echo "Skipping triggering the workflow."
-  fi
+  echo: ">>>> $inputs"
 
-  if [ "${wait_workflow}" = true ]
-  then
-    wait_for_workflow_to_finish
-  else
-    echo "Skipping waiting for workflow."
-  fi
+#  if [ "${trigger_workflow}" = true ]
+#  then
+#    trigger_workflow
+#  else
+#    echo "Skipping triggering the workflow."
+#  fi
+#
+#  if [ "${wait_workflow}" = true ]
+#  then
+#    wait_for_workflow_to_finish
+#  else
+#    echo "Skipping waiting for workflow."
+#  fi
 }
 
 main
