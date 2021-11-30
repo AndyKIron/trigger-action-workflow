@@ -91,14 +91,15 @@ trigger_workflow() {
 wait_for_workflow_to_finish() {
   # Find the id of the last run using filters to identify the workflow triggered by this action
   echo "Getting the ID of the workflow..."
-  # get needed workflow id
-  triggered_workflow_id="null"
   # get list of workflows
   query="event=workflow_dispatch"
   if [ "$INPUT_GITHUB_USER" ]
   then
     query="${query}&actor=${INPUT_GITHUB_USER}"
   fi
+
+  # get needed workflow id
+  triggered_workflow_id="null"
 
   list_workflows_ids=$(curl -X GET "${GITHUB_API_URL}/repos/${INPUT_OWNER}/${INPUT_REPO}/actions/workflows/${INPUT_WORKFLOW_FILE_NAME}/runs?${query}" \
     -H 'Accept: application/vnd.github.antiope-preview+json' \
@@ -117,8 +118,6 @@ wait_for_workflow_to_finish() {
       break
     fi
   done
-
-  echo ">> $triggered_workflow_id"
 
   # first try get workflow ryn in with status - queued
   # get running workflows with statuses 'queued' and 'in_progress'
